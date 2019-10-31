@@ -1,9 +1,12 @@
 import { applyMiddleware, combineReducers, createStore } from "redux";
 import { combineEpics, createEpicMiddleware } from "redux-observable";
 import logger from "redux-logger";
+import { todoEpic, todoReducer } from "./todo";
 
-const rootReducer = combineReducers({});
-const rootEpic = combineEpics();
+const rootReducer = combineReducers({
+  todoReducer
+});
+const rootEpic = combineEpics(todoEpic);
 
 const epicMiddleware = createEpicMiddleware();
 
