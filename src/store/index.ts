@@ -1,12 +1,20 @@
 import { applyMiddleware, combineReducers, createStore } from "redux";
 import { combineEpics, createEpicMiddleware } from "redux-observable";
 import logger from "redux-logger";
-import { todoEpic, todoReducer } from "./todo";
+import { todoEpics, todoReducer, TodoState } from './todo';
+import { pingEpics, pingReducer, PingState } from './ping';
+
+export interface RootState {
+  todoReducer: TodoState;
+  pingReducer: PingState;
+}
 
 const rootReducer = combineReducers({
-  todoReducer
+  todoReducer,
+  pingReducer
 });
-const rootEpic = combineEpics(todoEpic);
+
+const rootEpic = combineEpics(todoEpics, pingEpics);
 
 const epicMiddleware = createEpicMiddleware();
 

@@ -70,4 +70,4 @@ export const todoReducer = (
   }
 };
 
-export const todoEpic = combineEpics(fetchTodosEpic);
+export const todoEpics = combineEpics(fetchTodosEpic);
