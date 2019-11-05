@@ -3,6 +3,9 @@ import { catchError, mapTo, switchMap } from "rxjs/operators";
 import { createAction, handleActions } from "redux-actions";
 import { request } from "../lib/axios";
 
+/*************************************
+ * Typings
+ *************************************/
 export interface AddTodoParams {
   title: string;
 }
@@ -21,13 +24,17 @@ export type TodoAction =
   | ReturnType<typeof addTodo>
   | ReturnType<typeof removeTodo>;
 
-// Action Types
+/*************************************
+ * Action Types
+ *************************************/
 const FETCH_TODO = "todo/FETCH" as const;
 const FETCH_TODO_SUCCESS = "todo/FETCH_SUCCESS" as const;
 const ADD_TODO = "todo/ADD" as const;
 const REMOVE_TODO = "todo/REMOVE" as const;
 
-// Action
+/*************************************
+ * Actions
+ *************************************/
 export const addTodo = (params: AddTodoParams) =>
   createAction(ADD_TODO)(params);
 
@@ -35,6 +42,9 @@ export const removeTodo = (id: number) => createAction(REMOVE_TODO)({ id });
 
 export const fetchTodo = createAction(FETCH_TODO);
 
+/*************************************
+ * Epics
+ *************************************/
 const fetchTodosEpic: Epic = action$ =>
   action$.pipe(
     ofType(FETCH_TODO),
@@ -46,10 +56,16 @@ const fetchTodosEpic: Epic = action$ =>
     mapTo({ type: FETCH_TODO_SUCCESS })
   );
 
+/*************************************
+ * State
+ *************************************/
 const initialState: TodoState = {
   todoItems: []
 };
 
+/*************************************
+ * Reducer
+ *************************************/
 const reducer = {
   [ADD_TODO]: (state: TodoState, action: TodoAction): TodoState => ({
     ...state,

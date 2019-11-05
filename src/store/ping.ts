@@ -3,18 +3,30 @@ import { catchError, delay, mapTo, switchMap } from "rxjs/operators";
 import { of } from "rxjs";
 import { createAction, handleActions } from "redux-actions";
 
+/*************************************
+ * Typings
+ *************************************/
 export interface PingState {
   isPinging: boolean;
 }
 
 export type PingAction = ReturnType<typeof ping> | ReturnType<typeof pong>;
 
+/*************************************
+ * Action Types
+ *************************************/
 const PING = "PING" as const;
 const PONG = "PONG" as const;
 
+/*************************************
+ * Actions
+ *************************************/
 export const ping = () => createAction(PING)();
 export const pong = () => createAction(PONG)();
 
+/*************************************
+ * Epics
+ *************************************/
 const pingEpic: Epic = $action =>
   $action.pipe(
     ofType(PING),
@@ -27,10 +39,16 @@ const pingEpic: Epic = $action =>
     })
   );
 
+/*************************************
+ * State
+ *************************************/
 const initialState: PingState = {
   isPinging: false
 };
 
+/*************************************
+ * Reducer
+ *************************************/
 const reducer = {
   [PING]: (state: PingState, action: PingAction): PingState => ({
     ...state,
