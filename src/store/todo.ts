@@ -1,5 +1,7 @@
 import { combineEpics, Epic, ofType } from "redux-observable";
-import { delay, mapTo } from "rxjs/operators";
+import { catchError, mapTo, switchMap } from "rxjs/operators";
+import { createAction, handleActions } from "redux-actions";
+import { request } from "../lib/axios";
 
 export interface AddTodoParams {
   title: string;
@@ -21,53 +23,44 @@ export type TodoAction =
 
 // Action Types
 const FETCH_TODO = "todo/FETCH" as const;
+const FETCH_TODO_SUCCESS = "todo/FETCH_SUCCESS" as const;
 const ADD_TODO = "todo/ADD" as const;
 const REMOVE_TODO = "todo/REMOVE" as const;
 
-// Action Creator
-const addTodo = (params: AddTodoParams) => ({
-  type: ADD_TODO,
-  payload: {
-    ...params
-  }
-});
+// Action
+export const addTodo = (params: AddTodoParams) =>
+  createAction(ADD_TODO)(params);
 
-const removeTodo = (id: number) => ({
-  type: REMOVE_TODO,
-  payload: {
-    id
-  }
-});
+export const removeTodo = (id: number) => createAction(REMOVE_TODO)({ id });
+
+export const fetchTodo = createAction(FETCH_TODO);
 
 const fetchTodosEpic: Epic = action$ =>
   action$.pipe(
     ofType(FETCH_TODO),
-    delay(1000),
-    mapTo({ type: "FETCH_DONE" })
+    switchMap(value =>
+      request
+        .get("https://jsonplaceholder.typicode.com/todos/1")
+        .pipe(catchError(() => []))
+    ),
+    mapTo({ type: FETCH_TODO_SUCCESS })
   );
 
 const initialState: TodoState = {
   todoItems: []
 };
 
-export const todoReducer = (
-  state: TodoState = initialState,
-  action: TodoAction
-) => {
-  switch (action.type) {
-    case ADD_TODO: {
-      return Object.assign({}, state, {
-        todoItems: [...state.todoItems, action.payload]
-      });
-    }
-    case REMOVE_TODO: {
-      return Object.assign({}, state, {
-        todoItems: state.todoItems.filter(item => item.id !== action.payload.id)
-      });
-    }
-    default:
-      return state;
-  }
+const reducer = {
+  [ADD_TODO]: (state: TodoState, action: TodoAction): TodoState => ({
+    ...state,
+    todoItems: [...state.todoItems, action.payload]
+  }),
+  [REMOVE_TODO]: (state: TodoState, action: TodoAction): TodoState => ({
+    ...state,
+    todoItems: state.todoItems.filter(item => item.id !== action.payload.id)
+  })
 };
+
+export const todoReducer = handleActions(reducer, initialState);
 
 export const todoEpics = combineEpics(fetchTodosEpic);

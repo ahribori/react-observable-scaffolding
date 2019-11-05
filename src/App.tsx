@@ -2,6 +2,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ping, PingState } from "./store/ping";
 import { RootState } from "./store";
+import { fetchTodo } from './store/todo';
 
 const App: React.FC = () => {
   const isPinging = useSelector<RootState, boolean>(
@@ -13,11 +14,14 @@ const App: React.FC = () => {
     <div>
       <button
         onClick={() => {
-          dispatch(ping());
+          dispatch(fetchTodo());
         }}
       >
         PING
       </button>
+        <input type="text" onChange={() => {
+            dispatch(fetchTodo())
+        }}/>
     </div>
   );
 };
