@@ -1,6 +1,7 @@
 import { combineEpics, Epic, ofType } from "redux-observable";
 import { catchError, delay, mapTo, switchMap } from "rxjs/operators";
 import { of } from "rxjs";
+import { createAction, handleActions } from "redux-actions";
 
 export interface PingState {
   isPinging: boolean;
@@ -11,8 +12,8 @@ export type PingAction = ReturnType<typeof ping> | ReturnType<typeof pong>;
 const PING = "PING" as const;
 const PONG = "PONG" as const;
 
-export const ping = () => ({ type: PING });
-export const pong = () => ({ type: PONG });
+export const ping = () => createAction(PING)();
+export const pong = () => createAction(PONG)();
 
 const pingEpic: Epic = $action =>
   $action.pipe(
@@ -30,20 +31,17 @@ const initialState: PingState = {
   isPinging: false
 };
 
-export const pingReducer = (
-  state: PingState = initialState,
-  action: PingAction
-) => {
-  switch (action.type) {
-    case PING: {
-      return { isPinging: true };
-    }
-    case PONG: {
-      return { isPinging: false };
-    }
-    default:
-      return state;
-  }
+const reducer = {
+  [PING]: (state: PingState, action: PingAction): PingState => ({
+    ...state,
+    isPinging: true
+  }),
+  [PONG]: (state: PingState, action: PingAction): PingState => ({
+    ...state,
+    isPinging: false
+  })
 };
+
+export const pingReducer = handleActions(reducer, initialState);
 
 export const pingEpics = combineEpics(pingEpic);
