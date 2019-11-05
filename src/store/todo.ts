@@ -1,7 +1,6 @@
-import { combineEpics, Epic, ofType } from "redux-observable";
-import { catchError, mapTo, switchMap } from "rxjs/operators";
-import { createAction, handleActions } from "redux-actions";
-import { request } from "../lib/axios";
+import { combineEpics, Epic } from 'redux-observable';
+import { createAction, handleActions } from 'redux-actions';
+import { createAxiosEpic } from './_utils';
 
 /*************************************
  * Typings
@@ -28,7 +27,6 @@ export type TodoAction =
  * Action Types
  *************************************/
 const FETCH_TODO = "todo/FETCH" as const;
-const FETCH_TODO_SUCCESS = "todo/FETCH_SUCCESS" as const;
 const ADD_TODO = "todo/ADD" as const;
 const REMOVE_TODO = "todo/REMOVE" as const;
 
@@ -45,16 +43,12 @@ export const fetchTodo = createAction(FETCH_TODO);
 /*************************************
  * Epics
  *************************************/
-const fetchTodosEpic: Epic = action$ =>
-  action$.pipe(
-    ofType(FETCH_TODO),
-    switchMap(value =>
-      request
-        .get("https://jsonplaceholder.typicode.com/todos/1")
-        .pipe(catchError(() => []))
-    ),
-    mapTo({ type: FETCH_TODO_SUCCESS })
-  );
+const fetchTodosEpic: Epic = createAxiosEpic(FETCH_TODO, {
+  method: "GET",
+  url: "https://jsonplaceholder.typicode.com/todos1"
+});
+
+export const todoEpics = combineEpics(fetchTodosEpic);
 
 /*************************************
  * State
@@ -78,5 +72,3 @@ const reducer = {
 };
 
 export const todoReducer = handleActions(reducer, initialState);
-
-export const todoEpics = combineEpics(fetchTodosEpic);

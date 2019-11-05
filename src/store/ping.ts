@@ -39,6 +39,8 @@ const pingEpic: Epic = $action =>
     })
   );
 
+export const pingEpics = combineEpics(pingEpic);
+
 /*************************************
  * State
  *************************************/
@@ -61,5 +63,3 @@ const reducer = {
 };
 
 export const pingReducer = handleActions(reducer, initialState);
-
-export const pingEpics = combineEpics(pingEpic);
