@@ -1,6 +1,6 @@
-import { combineEpics, Epic } from 'redux-observable';
-import { createAction, handleActions } from 'redux-actions';
-import { createAxiosEpic } from './_utils';
+import { combineEpics, Epic } from "redux-observable";
+import { createAction, handleActions } from "redux-actions";
+import { createRequestEpic } from "./_utils";
 
 /*************************************
  * Typings
@@ -38,14 +38,16 @@ export const addTodo = (params: AddTodoParams) =>
 
 export const removeTodo = (id: number) => createAction(REMOVE_TODO)({ id });
 
-export const fetchTodo = createAction(FETCH_TODO);
+export const fetchTodo = (id: string) =>
+  createAction(FETCH_TODO)({
+    url: `https://jsonplaceholder.typicode.com/todos/${id}`
+  });
 
 /*************************************
  * Epics
  *************************************/
-const fetchTodosEpic: Epic = createAxiosEpic(FETCH_TODO, {
-  method: "GET",
-  url: "https://jsonplaceholder.typicode.com/todos1"
+const fetchTodosEpic: Epic = createRequestEpic(FETCH_TODO, {
+  method: "GET"
 });
 
 export const todoEpics = combineEpics(fetchTodosEpic);

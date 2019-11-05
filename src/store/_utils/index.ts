@@ -1,10 +1,10 @@
-import { createAction } from 'redux-actions';
-import { Epic, ofType } from 'redux-observable';
-import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { catchError, map, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
-import { Action } from '../index';
-import { axios } from '../../lib/axios';
+import { createAction } from "redux-actions";
+import { Epic, ofType } from "redux-observable";
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import { catchError, map, switchMap } from "rxjs/operators";
+import { of } from "rxjs";
+import { Action } from "../index";
+import { axios } from "../../lib/axios";
 
 export const createAsyncAction = <T>(actionType: string) => {
   const PENDING = `${actionType}`;
@@ -20,19 +20,23 @@ export const createAsyncAction = <T>(actionType: string) => {
   };
 };
 
-export const createAxiosEpic = <T>(
+export const createRequestEpic = <T>(
   type: string,
-  axiosConfig: AxiosRequestConfig
+  requestConfig: AxiosRequestConfig
 ): Epic => {
   const asyncActions = createAsyncAction<T>(type);
   return action$ =>
     action$.pipe(
       ofType(asyncActions.PendingActionType),
-      switchMap((action: Action) =>
-        axios.request(axiosConfig).pipe(
-          map((response: AxiosResponse) => asyncActions.success(response.data)),
-          catchError(err => of(asyncActions.failure(err.response)))
-        )
-      )
+      switchMap((action: Action) => {
+        return axios
+          .request(Object.assign({}, requestConfig, action.payload))
+          .pipe(
+            map((response: AxiosResponse) =>
+              asyncActions.success(response.data)
+            ),
+            catchError(err => of(asyncActions.failure(err.response)))
+          );
+      })
     );
 };
