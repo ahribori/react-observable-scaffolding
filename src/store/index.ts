@@ -1,8 +1,8 @@
 import { applyMiddleware, combineReducers, createStore } from "redux";
 import { combineEpics, createEpicMiddleware } from "redux-observable";
 import logger from "redux-logger";
-import { TodoAction, todoEpics, todoReducer, TodoState } from "./todo";
-import { PingAction, pingEpics, pingReducer, PingState } from "./ping";
+import { TodoAction, todoEpics, todoReducer, TodoState } from "./module/todo";
+import { PingAction, pingEpics, pingReducer, PingState } from "./module/ping";
 
 export interface RootState {
   todoReducer: TodoState;

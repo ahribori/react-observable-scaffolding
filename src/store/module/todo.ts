@@ -1,6 +1,11 @@
 import { combineEpics, Epic } from "redux-observable";
 import { createAction, handleActions } from "redux-actions";
-import { createRequestEpic } from "./_utils";
+import {
+  createAsyncActionTypes,
+  createRequestAction,
+  createRequestEpic
+} from "../_utils";
+import TodoService from "../../service/TodoService";
 
 /*************************************
  * Typings
@@ -26,7 +31,7 @@ export type TodoAction =
 /*************************************
  * Action Types
  *************************************/
-const FETCH_TODO = "todo/FETCH" as const;
+const FETCH_TODO = createAsyncActionTypes("todo/FETCH");
 const ADD_TODO = "todo/ADD" as const;
 const REMOVE_TODO = "todo/REMOVE" as const;
 
@@ -38,17 +43,13 @@ export const addTodo = (params: AddTodoParams) =>
 
 export const removeTodo = (id: number) => createAction(REMOVE_TODO)({ id });
 
-export const fetchTodo = (id: string) =>
-  createAction(FETCH_TODO)({
-    url: `https://jsonplaceholder.typicode.com/todos/${id}`
-  });
+export const fetchTodo = (id: number) =>
+  createRequestAction(FETCH_TODO.START, TodoService.fetchTodo(id));
 
 /*************************************
  * Epics
  *************************************/
-const fetchTodosEpic: Epic = createRequestEpic(FETCH_TODO, {
-  method: "GET"
-});
+const fetchTodosEpic: Epic = createRequestEpic(FETCH_TODO);
 
 export const todoEpics = combineEpics(fetchTodosEpic);
 
@@ -70,6 +71,14 @@ const reducer = {
   [REMOVE_TODO]: (state: TodoState, action: TodoAction): TodoState => ({
     ...state,
     todoItems: state.todoItems.filter(item => item.id !== action.payload.id)
+  }),
+  [FETCH_TODO.START]: (state: TodoState, action: TodoAction): TodoState => ({
+    ...state,
+    todoItems: []
+  }),
+  [FETCH_TODO.SUCCESS]: (state: TodoState, action: TodoAction): TodoState => ({
+    ...state,
+    todoItems: [...state.todoItems, action.payload]
   })
 };
 
