@@ -2,10 +2,9 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./store";
 import { ping } from "./store/module/ping";
-import { debounceTime, map, switchMap } from "rxjs/operators";
+import { debounceTime, filter, map, switchMap, takeUntil } from "rxjs/operators";
 import { useRxFromEvent } from "./hook/useRx";
 import TodoService from "./service/TodoService";
-import { ofType } from "redux-observable";
 
 const App: React.FC = () => {
   const isPinging = useSelector<RootState, boolean>(state => state.pingReducer.isPinging);
@@ -35,11 +34,15 @@ const App: React.FC = () => {
     )
     .subscribe();
 
-  mouse$
+  const up$ = mouse$.pipe(filter(e => e.type === "mouseup"));
+  const down$ = mouse$.pipe(filter(e => e.type === "mousedown"));
+  const move$ = mouse$.pipe(filter(e => e.type === "mousemove"));
+  const drag$ = down$.pipe(switchMap(down => move$.pipe(takeUntil(up$))));
+
+  drag$
     .pipe(
-      ofType("mousedown"),
-      map(e => {
-        console.log(e);
+      map(value => {
+        console.log(value);
       })
     )
     .subscribe();
